@@ -14,6 +14,8 @@ import Auth from './components/Auth'
 export default function App() {
   // Authentication State
   const [session, setSession] = useState(null)
+  const [storeName, setStoreName] = useState('My Digital Khata')
+  const [theme, setTheme] = useState(() => localStorage.getItem('khata_theme') || 'indigo')
 
   // Application State
   const [customers, setCustomers] = useState([])
@@ -54,6 +56,7 @@ export default function App() {
       supabase.auth.getSession().then(({ data: { session } }) => {
         setSession(session)
         if (session) {
+          setStoreName(session.user?.user_metadata?.store_name || 'My Digital Khata')
           loadData()
         } else {
           setLoading(false)
@@ -64,10 +67,12 @@ export default function App() {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session)
         if (session) {
+          setStoreName(session.user?.user_metadata?.store_name || 'My Digital Khata')
           loadData()
         } else {
           setCustomers([])
           setTransactions([])
+          setStoreName('My Digital Khata')
           setLoading(false)
         }
       })
@@ -75,15 +80,40 @@ export default function App() {
       return () => subscription.unsubscribe()
     } else {
       // Local Demo Mode
+      const savedName = localStorage.getItem('khata_store_name') || 'My Digital Khata'
+      setStoreName(savedName)
       loadData()
     }
   }, [])
+
+  const handleUpdateStoreName = async (newName) => {
+    if (isSupabaseConfigured && session) {
+      try {
+        const { error } = await supabase.auth.updateUser({
+          data: { store_name: newName }
+        })
+        if (error) throw error
+        setStoreName(newName)
+      } catch (err) {
+        console.error('Error updating store name:', err)
+      }
+    } else {
+      setStoreName(newName)
+      localStorage.setItem('khata_store_name', newName)
+    }
+  }
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme)
+    localStorage.setItem('khata_theme', newTheme)
+  }
 
   const handleLogout = async () => {
     try {
       setLoading(true)
       await supabase.auth.signOut()
       setSession(null)
+      setStoreName('My Digital Khata')
     } catch (err) {
       console.error('Logout error:', err)
     } finally {
@@ -164,6 +194,7 @@ export default function App() {
               onBack={() => setSelectedCustomer(null)}
               onAddTransaction={triggerAddTransaction}
               onDeleteTransaction={handleDeleteTransactionSubmit}
+              storeName={storeName}
             />
           ) : (
             /* Main Directory/Dashboard View */
@@ -174,6 +205,10 @@ export default function App() {
                 transactions={transactions} 
                 onLogout={handleLogout}
                 isLive={isSupabaseConfigured}
+                storeName={storeName}
+                onUpdateStoreName={handleUpdateStoreName}
+                theme={theme}
+                onChangeTheme={handleThemeChange}
               />
 
               {/* Guide Toggle Banner (Only shows if Supabase isn't configured) */}
@@ -208,7 +243,12 @@ export default function App() {
               {/* Floating Action Button (FAB) for Add Customer */}
               <button
                 onClick={() => setIsCustomerModalOpen(true)}
-                className="fixed bottom-6 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg shadow-indigo-600/30 transition-transform active:scale-[0.95]"
+                className={`fixed bottom-6 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 text-white rounded-full shadow-lg transition-all active:scale-[0.95] cursor-pointer ${
+                  theme === 'indigo' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/30' :
+                  theme === 'emerald' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30' :
+                  theme === 'amber' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/30' :
+                  'bg-slate-700 hover:bg-slate-800 shadow-slate-700/30'
+                }`}
                 title="Add New Customer"
               >
                 <Plus size={24} />
