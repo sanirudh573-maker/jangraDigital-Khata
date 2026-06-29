@@ -39,13 +39,20 @@ const seedLocalStorage = () => {
 
   if (!localStorage.getItem('khata_items')) {
     const defaultItems = [
-      { id: 'item-1', name: 'Lakme Satin Lipstick', brand: 'Lakme', price: 350, stock: 15, created_at: new Date().toISOString() },
-      { id: 'item-2', name: 'Nivea Soft Cream 200ml', brand: 'Nivea', price: 299, stock: 20, created_at: new Date().toISOString() },
-      { id: 'item-3', name: 'Maybelline Fit Me Foundation', brand: 'Maybelline', price: 549, stock: 8, created_at: new Date().toISOString() },
-      { id: 'item-4', name: 'L\'Oreal Paris Shampoo 340ml', brand: 'L\'Oreal', price: 399, stock: 12, created_at: new Date().toISOString() },
-      { id: 'item-5', name: 'Pond\'s Dreamflower Talc 200g', brand: 'Pond\'s', price: 180, stock: 25, created_at: new Date().toISOString() },
-      { id: 'item-6', name: 'Lotus Herbals Sunscreen SPF50', brand: 'Lotus', price: 425, stock: 10, created_at: new Date().toISOString() },
-      { id: 'item-7', name: 'Mamaearth Onion Hair Oil 150ml', brand: 'Mamaearth', price: 399, stock: 14, created_at: new Date().toISOString() }
+      // Products
+      { id: 'item-1', name: 'Lakme Satin Lipstick', brand: 'Lakme', price: 350, stock: 15, type: 'product', created_at: new Date().toISOString() },
+      { id: 'item-2', name: 'Nivea Soft Cream 200ml', brand: 'Nivea', price: 299, stock: 20, type: 'product', created_at: new Date().toISOString() },
+      { id: 'item-3', name: 'Maybelline Fit Me Foundation', brand: 'Maybelline', price: 549, stock: 8, type: 'product', created_at: new Date().toISOString() },
+      { id: 'item-4', name: 'L\'Oreal Paris Shampoo 340ml', brand: 'L\'Oreal', price: 399, stock: 12, type: 'product', created_at: new Date().toISOString() },
+      { id: 'item-5', name: 'Pond\'s Dreamflower Talc 200g', brand: 'Pond\'s', price: 180, stock: 25, type: 'product', created_at: new Date().toISOString() },
+      { id: 'item-6', name: 'Lotus Herbals Sunscreen SPF50', brand: 'Lotus', price: 425, stock: 10, type: 'product', created_at: new Date().toISOString() },
+      { id: 'item-7', name: 'Mamaearth Onion Hair Oil 150ml', brand: 'Mamaearth', price: 399, stock: 14, type: 'product', created_at: new Date().toISOString() },
+      // Parlour Services
+      { id: 'item-srv-1', name: 'Bridal Makeup (ब्राइडल मेकअप)', brand: 'Parlour', price: 5000, stock: 0, type: 'service', created_at: new Date().toISOString() },
+      { id: 'item-srv-2', name: 'Facial & Glow Treatment (फेशियल)', brand: 'Parlour', price: 800, stock: 0, type: 'service', created_at: new Date().toISOString() },
+      { id: 'item-srv-3', name: 'Hair Cut & Styling (हेयर कट)', brand: 'Parlour', price: 350, stock: 0, type: 'service', created_at: new Date().toISOString() },
+      { id: 'item-srv-4', name: 'Threading & Eyebrows (थ्रेडिंग)', brand: 'Parlour', price: 50, stock: 0, type: 'service', created_at: new Date().toISOString() },
+      { id: 'item-srv-5', name: 'Manicure & Pedicure (मैनिक्योर)', brand: 'Parlour', price: 600, stock: 0, type: 'service', created_at: new Date().toISOString() }
     ]
     localStorage.setItem('khata_items', JSON.stringify(defaultItems))
   }
@@ -208,8 +215,7 @@ export const dataService = {
       return items.sort((a, b) => a.name.localeCompare(b.name))
     }
   },
-
-  async addItem(name, brand, price, stock) {
+  async addItem(name, brand, price, stock, type = 'product') {
     if (isSupabaseConfigured) {
       try {
         const { data, error } = await supabase
@@ -218,7 +224,8 @@ export const dataService = {
             name, 
             brand: brand || '', 
             price: parseFloat(price), 
-            stock: parseInt(stock) || 0 
+            stock: type === 'product' ? (parseInt(stock) || 0) : 0,
+            type
           }])
           .select()
           .single()
@@ -232,7 +239,8 @@ export const dataService = {
           name,
           brand: brand || '',
           price: parseFloat(price),
-          stock: parseInt(stock) || 0,
+          stock: type === 'product' ? (parseInt(stock) || 0) : 0,
+          type,
           created_at: new Date().toISOString()
         }
         items.push(newItem)
@@ -246,7 +254,8 @@ export const dataService = {
         name,
         brand: brand || '',
         price: parseFloat(price),
-        stock: parseInt(stock) || 0,
+        stock: type === 'product' ? (parseInt(stock) || 0) : 0,
+        type,
         created_at: new Date().toISOString()
       }
       items.push(newItem)

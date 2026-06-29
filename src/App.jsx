@@ -346,13 +346,14 @@ create table transactions (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Create items table (Cosmetics Inventory)
+-- Create items table (Cosmetics Inventory & Parlour Services)
 create table items (
   id uuid default gen_random_uuid() primary key,
   name text not null,
   brand text,
   price numeric not null,
   stock integer default 0,
+  type text default 'product' check (type in ('product', 'service')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

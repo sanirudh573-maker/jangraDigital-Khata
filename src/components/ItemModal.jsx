@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
-import { X, Check, Sparkles, Tag, Archive } from 'lucide-react'
+import { X, Check, Sparkles, Tag, Archive, Scissors } from 'lucide-react'
 
-const SUGGESTED_BRANDS = ['Lakme', 'Maybelline', 'Nivea', 'Pond\'s', 'L\'Oreal', 'Lotus', 'Mamaearth']
+const SUGGESTED_BRANDS = ['Lakme', 'Maybelline', 'Nivea', 'Pond\'s', 'L\'Oreal', 'Lotus', 'Mamaearth', 'Parlour']
 
 export default function ItemModal({ isOpen, onClose, onSubmit }) {
   const [name, setName] = useState('')
   const [brand, setBrand] = useState('')
   const [price, setPrice] = useState('')
   const [stock, setStock] = useState('')
+  const [type, setType] = useState('product') // 'product' or 'service'
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -18,7 +19,7 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
     setError('')
 
     if (!name.trim()) {
-      setError('Item name is required.')
+      setError('Name is required.')
       return
     }
 
@@ -28,8 +29,8 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
       return
     }
 
-    const parsedStock = parseInt(stock) || 0
-    if (parsedStock < 0) {
+    const parsedStock = type === 'product' ? (parseInt(stock) || 0) : 0
+    if (type === 'product' && parsedStock < 0) {
       setError('Stock cannot be negative.')
       return
     }
@@ -38,19 +39,21 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
       setLoading(true)
       await onSubmit({
         name: name.trim(),
-        brand: brand.trim(),
+        brand: brand.trim() || (type === 'service' ? 'Parlour' : ''),
         price: parsedPrice,
-        stock: parsedStock
+        stock: parsedStock,
+        type
       })
       // Reset
       setName('')
       setBrand('')
       setPrice('')
       setStock('')
+      setType('product')
       onClose()
     } catch (err) {
       console.error(err)
-      setError('Failed to save item. Please try again.')
+      setError('Failed to save. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -64,13 +67,13 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
       {/* Modal Card */}
       <div className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-100 p-6 z-10 transition-transform transform translate-y-0 animate-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
           <div>
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
               <Sparkles size={16} className="text-emerald-600 animate-pulse" />
-              <span>Add Cosmetics Item</span>
+              <span>Add to Catalog</span>
             </h2>
-            <p className="text-[10px] text-slate-400 font-medium">Add product to your cosmetic counter catalog</p>
+            <p className="text-[10px] text-slate-400 font-medium">Add a product or beauty parlour service</p>
           </div>
           <button
             onClick={onClose}
@@ -88,20 +91,51 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
             </div>
           )}
 
+          {/* Type Selector (Product vs Service) */}
+          <div>
+            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+              Catalog Type
+            </label>
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setType('product')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  type === 'product'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                Product (सामान)
+              </button>
+              <button
+                type="button"
+                onClick={() => setType('service')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                  type === 'service'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                Parlour Service (सेवा)
+              </button>
+            </div>
+          </div>
+
           {/* Name Field */}
           <div>
             <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-              Item Name / Product
+              {type === 'product' ? 'Product Name' : 'Service Name'}
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
-                <Sparkles size={16} />
+                {type === 'product' ? <Sparkles size={16} /> : <Scissors size={16} />}
               </span>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Lakme Matte Lipstick"
+                placeholder={type === 'product' ? 'e.g. Lakme Matte Lipstick' : 'e.g. Bridal Makeup / Facial'}
                 required
                 disabled={loading}
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white text-slate-900 transition-all"
@@ -112,7 +146,7 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
           {/* Brand Field */}
           <div>
             <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-              Brand Name
+              {type === 'product' ? 'Brand Name' : 'Category / Salon Name'}
             </label>
             <div className="relative mb-2">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none">
@@ -122,7 +156,7 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
                 type="text"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-                placeholder="e.g. Lakme"
+                placeholder={type === 'product' ? 'e.g. Lakme' : 'e.g. Parlour / Bridal'}
                 disabled={loading}
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white text-slate-900 transition-all"
               />
@@ -144,11 +178,11 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
           </div>
 
           {/* Price & Stock Grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className={type === 'product' ? 'grid grid-cols-2 gap-3' : 'w-full'}>
             {/* MRP Price */}
             <div>
               <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                MRP Price (₹)
+                {type === 'product' ? 'MRP Price (₹)' : 'Service Price / Fee (₹)'}
               </label>
               <input
                 type="number"
@@ -165,22 +199,24 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
               />
             </div>
 
-            {/* Current Stock */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <Archive size={11} />
-                <span>Initial Stock</span>
-              </label>
-              <input
-                type="number"
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                placeholder="e.g. 10"
-                min="0"
-                disabled={loading}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white text-slate-900 transition-all"
-              />
-            </div>
+            {/* Current Stock (Only for Products) */}
+            {type === 'product' && (
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                  <Archive size={11} />
+                  <span>Initial Stock</span>
+                </label>
+                <input
+                  type="number"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="e.g. 10"
+                  min="0"
+                  disabled={loading}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white text-slate-900 transition-all"
+                />
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}
@@ -195,7 +231,7 @@ export default function ItemModal({ isOpen, onClose, onSubmit }) {
               ) : (
                 <>
                   <Check size={16} />
-                  <span>Add To Inventory</span>
+                  <span>{type === 'product' ? 'Add To Inventory' : 'Add Parlour Service'}</span>
                 </>
               )}
             </button>

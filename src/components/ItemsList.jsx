@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Search, Sparkles, Tag, Archive, Trash2, Plus } from 'lucide-react'
+import { Search, Sparkles, Tag, Archive, Trash2, Scissors } from 'lucide-react'
 
 // Brand color maps for cosmetics
 const BRAND_COLORS = {
@@ -11,19 +11,25 @@ const BRAND_COLORS = {
   ponds: 'bg-sky-50 text-sky-600 border-sky-100',
   "pond's": 'bg-sky-50 text-sky-600 border-sky-100',
   lotus: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-  mamaearth: 'bg-lime-50 text-lime-600 border-lime-100'
+  mamaearth: 'bg-lime-50 text-lime-600 border-lime-100',
+  parlour: 'bg-indigo-50 text-indigo-600 border-indigo-100'
 }
 
 export default function ItemsList({ items, onDeleteItem }) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [filterType, setFilterType] = useState('product') // 'product' or 'service'
 
   const getBrandBadgeClass = (brand) => {
     const key = brand.toLowerCase().trim()
     return BRAND_COLORS[key] || 'bg-slate-50 text-slate-600 border-slate-100'
   }
 
-  // Filter items by search
+  // Filter items by type and search query
   const filteredItems = items.filter(item => {
+    // Default undefined type to product
+    const itemType = item.type || 'product'
+    if (itemType !== filterType) return false
+
     const term = searchQuery.toLowerCase()
     return (
       item.name.toLowerCase().includes(term) ||
@@ -33,6 +39,30 @@ export default function ItemsList({ items, onDeleteItem }) {
 
   return (
     <div className="max-w-md mx-auto px-4 py-4 mb-24">
+      {/* Type Toggle Tabs (Products vs Services) */}
+      <div className="grid grid-cols-2 gap-2 mb-4 p-1 bg-slate-200/60 rounded-2xl">
+        <button
+          onClick={() => setFilterType('product')}
+          className={`py-2.5 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+            filterType === 'product'
+              ? 'bg-white text-emerald-700 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Cosmetics Products (सामान)
+        </button>
+        <button
+          onClick={() => setFilterType('service')}
+          className={`py-2.5 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+            filterType === 'service'
+              ? 'bg-white text-emerald-700 shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Beauty Services (पार्लर सेवाएं)
+        </button>
+      </div>
+
       {/* Search Bar */}
       <div className="relative mb-5">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -40,7 +70,7 @@ export default function ItemsList({ items, onDeleteItem }) {
         </div>
         <input
           type="text"
-          placeholder="Search cosmetics (lipstick, cream)..."
+          placeholder={filterType === 'product' ? 'Search lipstick, cream, shampoo...' : 'Search makeup, facial, hair styling...'}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="block w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm transition-all text-slate-900"
@@ -58,28 +88,29 @@ export default function ItemsList({ items, onDeleteItem }) {
       {/* Header Info */}
       <div className="flex items-center justify-between mb-4 px-1">
         <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Cosmetics Inventory ({filteredItems.length})
+          {filterType === 'product' ? 'Cosmetics Inventory' : 'Parlour Services'} ({filteredItems.length})
         </h2>
-        <span className="text-[10px] text-slate-400">Jangra Store Collection</span>
+        <span className="text-[10px] text-slate-400">Jangra Store & Parlour</span>
       </div>
 
       {/* Items Grid/List */}
       {filteredItems.length === 0 ? (
         <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center shadow-sm">
-          <div className="w-16 h-16 bg-rose-50 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Sparkles size={24} />
+          <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
+            {filterType === 'product' ? <Sparkles size={24} /> : <Scissors size={24} />}
           </div>
-          <h3 className="text-slate-800 font-semibold mb-1">No items found</h3>
+          <h3 className="text-slate-800 font-semibold mb-1">No {filterType}s found</h3>
           <p className="text-xs text-slate-500 max-w-[240px] mx-auto">
             {searchQuery 
-              ? "No items match your search. Try checking spelling." 
-              : "Click the '+' button below to add your first cosmetic item to the catalog."}
+              ? "No matches found. Try checking spelling." 
+              : `Click the '+' button below to add your first ${filterType} to the catalog.`}
           </p>
         </div>
       ) : (
         <div className="space-y-3">
           {filteredItems.map(item => {
-            const lowStock = item.stock <= 5
+            const isService = item.type === 'service'
+            const lowStock = !isService && item.stock <= 5
 
             return (
               <div
@@ -88,8 +119,10 @@ export default function ItemsList({ items, onDeleteItem }) {
               >
                 {/* Left: Info */}
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-400 to-emerald-400 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    <Sparkles size={16} />
+                  <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm flex-shrink-0 bg-gradient-to-tr ${
+                    isService ? 'from-indigo-400 to-purple-400' : 'from-rose-400 to-emerald-400'
+                  }`}>
+                    {isService ? <Scissors size={16} /> : <Sparkles size={16} />}
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 leading-snug">
@@ -103,12 +136,18 @@ export default function ItemsList({ items, onDeleteItem }) {
                         </span>
                       )}
                       
-                      <span className={`text-[9px] font-semibold flex items-center gap-0.5 ${
-                        lowStock ? 'text-rose-500' : 'text-slate-400'
-                      }`}>
-                        <Archive size={9} />
-                        <span>{item.stock} in stock</span>
-                      </span>
+                      {isService ? (
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded border bg-purple-50 text-purple-600 border-purple-100 uppercase">
+                          Parlour Service
+                        </span>
+                      ) : (
+                        <span className={`text-[9px] font-semibold flex items-center gap-0.5 ${
+                          lowStock ? 'text-rose-500' : 'text-slate-400'
+                        }`}>
+                          <Archive size={9} />
+                          <span>{item.stock} in stock</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -116,17 +155,19 @@ export default function ItemsList({ items, onDeleteItem }) {
                 {/* Right: Price & Delete */}
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">MRP Price</span>
+                    <span className="text-[10px] text-slate-400 font-semibold block uppercase tracking-wider">
+                      {isService ? 'Service Fee' : 'MRP Price'}
+                    </span>
                     <span className="text-sm font-extrabold text-emerald-600">₹{item.price}</span>
                   </div>
 
                   <button
                     onClick={() => {
-                      if (window.confirm(`Are you sure you want to delete ${item.name} from catalog?`)) {
+                      if (window.confirm(`Are you sure you want to delete "${item.name}" from catalog?`)) {
                         onDeleteItem(item.id)
                       }
                     }}
-                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                     title="Delete Item"
                   >
                     <Trash2 size={15} />

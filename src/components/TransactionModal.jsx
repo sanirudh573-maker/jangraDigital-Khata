@@ -83,6 +83,10 @@ export default function TransactionModal({ isOpen, onClose, onSubmit, type: init
   }
 
   const isCredit = type === 'CREDIT'
+  
+  // Filter products and services
+  const products = items.filter(i => (i.type || 'product') === 'product')
+  const services = items.filter(i => i.type === 'service')
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
@@ -170,12 +174,25 @@ export default function TransactionModal({ isOpen, onClose, onSubmit, type: init
                         onChange={(e) => setSelectedItemId(e.target.value)}
                         className="w-full px-2 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-700"
                       >
-                        <option value="">-- Choose Item --</option>
-                        {items.map(item => (
-                          <option key={item.id} value={item.id}>
-                            {item.name} (₹{item.price})
-                          </option>
-                        ))}
+                        <option value="">-- Choose Product / Service --</option>
+                        {products.length > 0 && (
+                          <optgroup label="Products (सामान)">
+                            {products.map(item => (
+                              <option key={item.id} value={item.id}>
+                                {item.name} (₹{item.price})
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {services.length > 0 && (
+                          <optgroup label="Parlour Services (सेवाएं)">
+                            {services.map(item => (
+                              <option key={item.id} value={item.id}>
+                                {item.name} (₹{item.price})
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
 
