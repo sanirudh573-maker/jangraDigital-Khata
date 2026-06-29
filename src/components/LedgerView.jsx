@@ -65,8 +65,10 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
       <html>
         <head>
           <title>Ledger Statement - ${customer.name}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 40px; color: #334155; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 0; color: #334155; background-color: #f8fafc; }
+            .preview-container { max-width: 800px; margin: 30px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); border: 1px solid #f1f5f9; }
             .header { border-bottom: 2px solid #10b981; padding-bottom: 16px; margin-bottom: 20px; }
             .title { font-size: 22px; font-weight: 850; color: #0f172a; margin: 0; }
             .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -78,52 +80,79 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
             table { width: 100%; border-collapse: collapse; margin-top: 10px; }
             th { background: #f1f5f9; padding: 10px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #475569; text-align: left; border-bottom: 1px solid #cbd5e1; }
             .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+            
+            @media (max-width: 640px) {
+              .preview-container { margin: 15px; padding: 15px; border-radius: 12px; }
+              .details { flex-direction: column; gap: 15px; }
+              .details-right { text-align: left; }
+            }
+
+            @media print {
+              .no-print { display: none !important; }
+              body { background-color: white; }
+              .preview-container { border: none; box-shadow: none; margin: 0; padding: 0; max-width: 100%; }
+            }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div class="title">Jangra Store</div>
-            <div class="subtitle">Ledger Statement Report</div>
-          </div>
-          <div class="details">
-            <div class="details-left">
-              <strong>CUSTOMER NAME:</strong><br/>
-              <span style="font-size: 14px; font-weight: 700; color: #0f172a;">${customer.name}</span><br/>
-              Phone: ${customer.phone}<br/>
-              Date Generated: ${new Date().toLocaleDateString('en-IN')}
+          <!-- Sticky Top Bar for Action Preview -->
+          <div class="no-print" style="position: sticky; top: 0; background: #0f172a; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); z-index: 100; font-family: sans-serif;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="background: #10b981; color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">JS</div>
+              <span style="color: white; font-size: 13px; font-weight: bold;">Jangra Store Ledger Preview</span>
             </div>
-            <div class="details-right">
-              <strong>LEDGER SUMMARY:</strong><br/>
-              Total Transactions: ${customerTxs.length}<br/>
-              Total Credit (उधार): ₹${totalCredit}<br/>
-              Total Debit (जमा): ₹${totalDebit}
+            <div style="display: flex; gap: 8px;">
+              <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px;">
+                Save PDF / Print
+              </button>
+              <button onclick="window.close()" style="background: #374151; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px;">
+                Close
+              </button>
             </div>
           </div>
-          <div class="balance-card">
-            <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">NET OUTSTANDING BALANCE</div>
-            <div class="balance-val">₹${Math.abs(balance).toLocaleString('en-IN')}</div>
-            <div style="font-size: 11px; font-weight: 600; color: ${balance > 0 ? '#dc2626' : balance < 0 ? '#16a34a' : '#64748b'}; margin-top: 4px;">
-              ${balance > 0 ? 'Customer will PAY (Udhar)' : balance < 0 ? 'You owe customer (Advance)' : 'Settled (₹0)'}
+
+          <div class="preview-container">
+            <div class="header">
+              <div class="title">Jangra Store</div>
+              <div class="subtitle">Ledger Statement Report</div>
+            </div>
+            <div class="details">
+              <div class="details-left">
+                <strong>CUSTOMER NAME:</strong><br/>
+                <span style="font-size: 14px; font-weight: 700; color: #0f172a;">${customer.name}</span><br/>
+                Phone: ${customer.phone}<br/>
+                Date Generated: ${new Date().toLocaleDateString('en-IN')}
+              </div>
+              <div class="details-right">
+                <strong>LEDGER SUMMARY:</strong><br/>
+                Total Transactions: ${customerTxs.length}<br/>
+                Total Credit (उधार): ₹${totalCredit}<br/>
+                Total Debit (जमा): ₹${totalDebit}
+              </div>
+            </div>
+            <div class="balance-card">
+              <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">NET OUTSTANDING BALANCE</div>
+              <div class="balance-val">₹${Math.abs(balance).toLocaleString('en-IN')}</div>
+              <div style="font-size: 11px; font-weight: 600; color: ${balance > 0 ? '#dc2626' : balance < 0 ? '#16a34a' : '#64748b'}; margin-top: 4px;">
+                ${balance > 0 ? 'Customer will PAY (Udhar)' : balance < 0 ? 'You owe customer (Advance)' : 'Settled (₹0)'}
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 30%;">Date & Time</th>
+                  <th style="width: 45%;">Description</th>
+                  <th style="width: 25%; text-align: right;">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${txRows || `<tr><td colspan="3" style="text-align: center; padding: 24px; color: #94a3b8;">No transactions.</td></tr>`}
+              </tbody>
+            </table>
+            <div class="footer">
+              Generated via Jangra Store app. Thank you!
             </div>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 30%;">Date & Time</th>
-                <th style="width: 45%;">Description</th>
-                <th style="width: 25%; text-align: right;">Amount (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${txRows || `<tr><td colspan="3" style="text-align: center; padding: 24px; color: #94a3b8;">No transactions.</td></tr>`}
-            </tbody>
-          </table>
-          <div class="footer">
-            Generated via Jangra Store app. Thank you!
-          </div>
-          <script>
-            window.onload = function() { window.print(); window.close(); }
-          </script>
         </body>
       </html>
     `)
