@@ -23,11 +23,11 @@ export default function ItemsList({ items, onDeleteItem }) {
     const key = brand.toLowerCase().trim()
     return BRAND_COLORS[key] || 'bg-slate-50 text-slate-600 border-slate-100'
   }
-
   // Filter items by type and search query
   const filteredItems = items.filter(item => {
-    // Default undefined type to product
-    const itemType = item.type || 'product'
+    // Default undefined type to product unless brand is parlour
+    const isService = item.type === 'service' || (item.brand && item.brand.toLowerCase() === 'parlour')
+    const itemType = isService ? 'service' : 'product'
     if (itemType !== filterType) return false
 
     const term = searchQuery.toLowerCase()

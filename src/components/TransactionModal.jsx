@@ -115,9 +115,14 @@ export default function TransactionModal({ isOpen, onClose, onSubmit, type: init
 
   const isCredit = type === 'CREDIT'
   
-  // Filter products and services
-  const products = items.filter(i => (i.type || 'product') === 'product')
-  const services = items.filter(i => i.type === 'service')
+  // Filter products and services with smart fallback for older items
+  const products = items.filter(i => {
+    const isService = i.type === 'service' || (i.brand && i.brand.toLowerCase() === 'parlour')
+    return !isService
+  })
+  const services = items.filter(i => {
+    return i.type === 'service' || (i.brand && i.brand.toLowerCase() === 'parlour')
+  })
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
