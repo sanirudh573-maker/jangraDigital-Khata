@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Custom styles can be added here if needed, but Tailwind CSS v4 provides standard classes. */
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+  }
+}
