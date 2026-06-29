@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Plus, HelpCircle, Info, Database } from 'lucide-react'
-import { isSupabaseConfigured } from './supabaseClient'
+import { supabase, isSupabaseConfigured } from './supabaseClient'
 import { dataService } from './services/dataService'
 
 // Import components
@@ -9,8 +9,12 @@ import CustomerList from './components/CustomerList'
 import LedgerView from './components/LedgerView'
 import CustomerModal from './components/CustomerModal'
 import TransactionModal from './components/TransactionModal'
+import Auth from './components/Auth'
 
 export default function App() {
+  // Authentication State
+  const [session, setSession] = useState(null)
+
   // Application State
   const [customers, setCustomers] = useState([])
   const [transactions, setTransactions] = useState([])
@@ -45,8 +49,47 @@ export default function App() {
   }
 
   useEffect(() => {
-    loadData()
+    if (isSupabaseConfigured) {
+      // Fetch initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session)
+        if (session) {
+          loadData()
+        } else {
+          setLoading(false)
+        }
+      })
+
+      // Listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session)
+        if (session) {
+          loadData()
+        } else {
+          setCustomers([])
+          setTransactions([])
+          setLoading(false)
+        }
+      })
+
+      return () => subscription.unsubscribe()
+    } else {
+      // Local Demo Mode
+      loadData()
+    }
   }, [])
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true)
+      await supabase.auth.signOut()
+      setSession(null)
+    } catch (err) {
+      console.error('Logout error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Refetch data when selected customer changes or on any write to keep states synced
   const handleAddCustomerSubmit = async ({ name, phone }) => {
@@ -79,6 +122,10 @@ export default function App() {
   const triggerAddTransaction = (type) => {
     setTransactionType(type)
     setIsTransactionModalOpen(true)
+  }
+
+  if (isSupabaseConfigured && !session) {
+    return <Auth onAuthSuccess={setSession} />
   }
 
   return (
@@ -122,7 +169,12 @@ export default function App() {
             /* Main Directory/Dashboard View */
             <div className="flex-1 flex flex-col">
               {/* Stats Header */}
-              <DashboardStats customers={customers} transactions={transactions} />
+              <DashboardStats 
+                customers={customers} 
+                transactions={transactions} 
+                onLogout={handleLogout}
+                isLive={isSupabaseConfigured}
+              />
 
               {/* Guide Toggle Banner (Only shows if Supabase isn't configured) */}
               {!isSupabaseConfigured && (

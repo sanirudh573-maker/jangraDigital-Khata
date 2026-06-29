@@ -1,7 +1,7 @@
 import React from 'react'
 import { ArrowUpRight, ArrowDownLeft, Users, Wallet } from 'lucide-react'
 
-export default function DashboardStats({ customers, transactions }) {
+export default function DashboardStats({ customers, transactions, onLogout, isLive }) {
   // Calculate stats
   // Total Outstanding Balance: Sum of CREDIT - DEBIT across all transactions
   const totalBalance = transactions.reduce((acc, tx) => {
@@ -37,9 +37,19 @@ export default function DashboardStats({ customers, transactions }) {
               <p className="text-[10px] text-slate-400 font-medium">DIGITAL ACTIVE LEDGER</p>
             </div>
           </div>
-          <span className="text-xs bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-full font-semibold">
-            {localStorage.getItem('khata_customers') && !import.meta.env.VITE_SUPABASE_URL ? 'Demo Mode' : 'Supabase Live'}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-full font-semibold">
+              {isLive ? 'Supabase Live' : 'Demo Mode'}
+            </span>
+            {isLive && onLogout && (
+              <button
+                onClick={onLogout}
+                className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2 py-1 rounded-lg border border-slate-700 transition-colors font-bold cursor-pointer"
+              >
+                Log Out
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Highlight Card: Total Outstanding */}
