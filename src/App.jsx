@@ -354,7 +354,12 @@ create table items (
   price numeric not null,
   stock integer default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);`}
+);
+
+-- Disable Row Level Security (RLS) for easy access
+alter table customers disable row level security;
+alter table transactions disable row level security;
+alter table items disable row level security;`}
                 </pre>
 
                 <p>
