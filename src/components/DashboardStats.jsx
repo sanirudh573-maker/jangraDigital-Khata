@@ -31,7 +31,7 @@ export default function DashboardStats({ customers, transactions, onLogout, isLi
               <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-[12px] font-extrabold tracking-tight bg-slate-100 truncate">
+              <h1 className="text-xs sm:text-sm font-extrabold tracking-tight text-slate-100 truncate">
                 Jangra Store & Parlour
               </h1>
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">DIGITAL LEDGER</p>
