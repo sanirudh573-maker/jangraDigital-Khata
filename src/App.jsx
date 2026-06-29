@@ -344,6 +344,16 @@ create table transactions (
   type text check (type in ('CREDIT', 'DEBIT')) not null,
   description text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Create items table (Cosmetics Inventory)
+create table items (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  brand text,
+  price numeric not null,
+  stock integer default 0,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );`}
                 </pre>
 

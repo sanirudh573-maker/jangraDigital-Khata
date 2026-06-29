@@ -191,12 +191,18 @@ export const dataService = {
   // --- Cosmetics Items ---
   async getItems() {
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from('items')
-        .select('*')
-        .order('name', { ascending: true })
-      if (error) throw error
-      return data
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select('*')
+          .order('name', { ascending: true })
+        if (error) throw error
+        return data
+      } catch (err) {
+        console.warn("Supabase 'items' table might not be created yet. Falling back to LocalStorage:", err.message)
+        const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
+        return items.sort((a, b) => a.name.localeCompare(b.name))
+      }
     } else {
       const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
       return items.sort((a, b) => a.name.localeCompare(b.name))
@@ -205,18 +211,34 @@ export const dataService = {
 
   async addItem(name, brand, price, stock) {
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase
-        .from('items')
-        .insert([{ 
-          name, 
-          brand: brand || '', 
-          price: parseFloat(price), 
-          stock: parseInt(stock) || 0 
-        }])
-        .select()
-        .single()
-      if (error) throw error
-      return data
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .insert([{ 
+            name, 
+            brand: brand || '', 
+            price: parseFloat(price), 
+            stock: parseInt(stock) || 0 
+          }])
+          .select()
+          .single()
+        if (error) throw error
+        return data
+      } catch (err) {
+        console.warn("Failed to add item to Supabase, falling back to LocalStorage:", err.message)
+        const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
+        const newItem = {
+          id: 'item-' + mockUuid(),
+          name,
+          brand: brand || '',
+          price: parseFloat(price),
+          stock: parseInt(stock) || 0,
+          created_at: new Date().toISOString()
+        }
+        items.push(newItem)
+        localStorage.setItem('khata_items', JSON.stringify(items))
+        return newItem
+      }
     } else {
       const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
       const newItem = {
@@ -235,12 +257,20 @@ export const dataService = {
 
   async deleteItem(id) {
     if (isSupabaseConfigured) {
-      const { error } = await supabase
-        .from('items')
-        .delete()
-        .eq('id', id)
-      if (error) throw error
-      return true
+      try {
+        const { error } = await supabase
+          .from('items')
+          .delete()
+          .eq('id', id)
+        if (error) throw error
+        return true
+      } catch (err) {
+        console.warn("Failed to delete item from Supabase, falling back to LocalStorage:", err.message)
+        const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
+        const filtered = items.filter(i => i.id !== id)
+        localStorage.setItem('khata_items', JSON.stringify(filtered))
+        return true
+      }
     } else {
       const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
       const filtered = items.filter(i => i.id !== id)
