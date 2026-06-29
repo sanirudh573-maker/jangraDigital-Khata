@@ -36,6 +36,19 @@ const seedLocalStorage = () => {
     ]
     localStorage.setItem('khata_transactions', JSON.stringify(defaultTransactions))
   }
+
+  if (!localStorage.getItem('khata_items')) {
+    const defaultItems = [
+      { id: 'item-1', name: 'Lakme Satin Lipstick', brand: 'Lakme', price: 350, stock: 15, created_at: new Date().toISOString() },
+      { id: 'item-2', name: 'Nivea Soft Cream 200ml', brand: 'Nivea', price: 299, stock: 20, created_at: new Date().toISOString() },
+      { id: 'item-3', name: 'Maybelline Fit Me Foundation', brand: 'Maybelline', price: 549, stock: 8, created_at: new Date().toISOString() },
+      { id: 'item-4', name: 'L\'Oreal Paris Shampoo 340ml', brand: 'L\'Oreal', price: 399, stock: 12, created_at: new Date().toISOString() },
+      { id: 'item-5', name: 'Pond\'s Dreamflower Talc 200g', brand: 'Pond\'s', price: 180, stock: 25, created_at: new Date().toISOString() },
+      { id: 'item-6', name: 'Lotus Herbals Sunscreen SPF50', brand: 'Lotus', price: 425, stock: 10, created_at: new Date().toISOString() },
+      { id: 'item-7', name: 'Mamaearth Onion Hair Oil 150ml', brand: 'Mamaearth', price: 399, stock: 14, created_at: new Date().toISOString() }
+    ]
+    localStorage.setItem('khata_items', JSON.stringify(defaultItems))
+  }
 }
 
 // Initialize seed data if using local mode
@@ -171,6 +184,67 @@ export const dataService = {
       const transactions = JSON.parse(localStorage.getItem('khata_transactions') || '[]')
       const filtered = transactions.filter(t => t.id !== id)
       localStorage.setItem('khata_transactions', JSON.stringify(filtered))
+      return true
+    }
+  },
+
+  // --- Cosmetics Items ---
+  async getItems() {
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('items')
+        .select('*')
+        .order('name', { ascending: true })
+      if (error) throw error
+      return data
+    } else {
+      const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
+      return items.sort((a, b) => a.name.localeCompare(b.name))
+    }
+  },
+
+  async addItem(name, brand, price, stock) {
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('items')
+        .insert([{ 
+          name, 
+          brand: brand || '', 
+          price: parseFloat(price), 
+          stock: parseInt(stock) || 0 
+        }])
+        .select()
+        .single()
+      if (error) throw error
+      return data
+    } else {
+      const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
+      const newItem = {
+        id: 'item-' + mockUuid(),
+        name,
+        brand: brand || '',
+        price: parseFloat(price),
+        stock: parseInt(stock) || 0,
+        created_at: new Date().toISOString()
+      }
+      items.push(newItem)
+      localStorage.setItem('khata_items', JSON.stringify(items))
+      return newItem
+    }
+  },
+
+  async deleteItem(id) {
+    if (isSupabaseConfigured) {
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id)
+      if (error) throw error
+      return true
+    } else {
+      const items = JSON.parse(localStorage.getItem('khata_items') || '[]')
+      const filtered = items.filter(i => i.id !== id)
+      localStorage.setItem('khata_items', JSON.stringify(filtered))
       return true
     }
   }

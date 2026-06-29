@@ -6,12 +6,17 @@ const QUICK_DESCRIPTIONS = {
   DEBIT: ['Cash Paid', 'GPay Payment', 'PhonePe', 'Paytm', 'Online Transfer', 'Settlement']
 }
 
-export default function TransactionModal({ isOpen, onClose, onSubmit, type: initialType, customerName }) {
+export default function TransactionModal({ isOpen, onClose, onSubmit, type: initialType, customerName, items = [] }) {
   const [type, setType] = useState(initialType || 'CREDIT')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Item Picker States
+  const [selectedItemId, setSelectedItemId] = useState('')
+  const [selectedQty, setSelectedQty] = useState(1)
+  const [showItemSelect, setShowItemSelect] = useState(false)
 
   // Sync initial type when modal opens
   useEffect(() => {
@@ -19,6 +24,32 @@ export default function TransactionModal({ isOpen, onClose, onSubmit, type: init
       setType(initialType)
     }
   }, [initialType, isOpen])
+
+  const handleAddItemToBill = () => {
+    if (!selectedItemId) return
+    const targetItem = items.find(i => i.id === selectedItemId)
+    if (!targetItem) return
+
+    const qty = parseInt(selectedQty) || 1
+    const cost = targetItem.price * qty
+
+    // Update amount
+    const currentAmt = parseFloat(amount) || 0
+    setAmount((currentAmt + cost).toFixed(2))
+
+    // Update description
+    const itemLabel = `${qty}x ${targetItem.name}`
+    if (description.trim()) {
+      setDescription(description.trim() + ', ' + itemLabel)
+    } else {
+      setDescription(itemLabel)
+    }
+
+    // Reset item inputs
+    setSelectedItemId('')
+    setSelectedQty(1)
+    setShowItemSelect(false)
+  }
 
   if (!isOpen) return null
 
@@ -112,6 +143,66 @@ export default function TransactionModal({ isOpen, onClose, onSubmit, type: init
               Paisa Mila (Debit)
             </button>
           </div>
+
+          {/* Cosmetics Item Picker (Only visible for CREDIT / Udhar Diya) */}
+          {isCredit && items.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                  <Sparkles size={12} className="text-emerald-500 animate-pulse" />
+                  <span>Choose Cosmetics Items</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowItemSelect(!showItemSelect)}
+                  className="text-[10px] font-bold text-emerald-600 hover:text-emerald-800 underline transition-all cursor-pointer"
+                >
+                  {showItemSelect ? 'Cancel' : '+ Add Item'}
+                </button>
+              </div>
+
+              {showItemSelect && (
+                <div className="space-y-2 mt-2 pt-2 border-t border-slate-200/50">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <select
+                        value={selectedItemId}
+                        onChange={(e) => setSelectedItemId(e.target.value)}
+                        className="w-full px-2 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-700"
+                      >
+                        <option value="">-- Choose Item --</option>
+                        {items.map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.name} (₹{item.price})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Qty"
+                        value={selectedQty}
+                        onChange={(e) => setSelectedQty(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-full px-2 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 text-slate-700 text-center"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddItemToBill}
+                    disabled={!selectedItemId}
+                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                  >
+                    Add to Bill
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Amount Field */}
           <div>

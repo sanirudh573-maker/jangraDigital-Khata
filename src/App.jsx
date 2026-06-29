@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, HelpCircle, Info, Database } from 'lucide-react'
+import { Plus, HelpCircle, Info, Database, BookOpen, Sparkles } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from './supabaseClient'
 import { dataService } from './services/dataService'
 
@@ -9,6 +9,8 @@ import CustomerList from './components/CustomerList'
 import LedgerView from './components/LedgerView'
 import CustomerModal from './components/CustomerModal'
 import TransactionModal from './components/TransactionModal'
+import ItemsList from './components/ItemsList'
+import ItemModal from './components/ItemModal'
 import Auth from './components/Auth'
 
 export default function App() {
@@ -18,11 +20,16 @@ export default function App() {
   // Application State
   const [customers, setCustomers] = useState([])
   const [transactions, setTransactions] = useState([])
+  const [items, setItems] = useState([])
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   
+  // Tab Navigation State
+  const [activeTab, setActiveTab] = useState('ledgers') // 'ledgers' or 'items'
+
   // Modal toggles
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false)
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [transactionType, setTransactionType] = useState('CREDIT') // 'CREDIT' or 'DEBIT'
   
   // App UI Helpers
@@ -36,9 +43,11 @@ export default function App() {
       setLoading(true)
       const fetchedCustomers = await dataService.getCustomers()
       const fetchedTransactions = await dataService.getTransactions()
+      const fetchedItems = await dataService.getItems()
       
       setCustomers(fetchedCustomers)
       setTransactions(fetchedTransactions)
+      setItems(fetchedItems)
       setError(null)
     } catch (err) {
       console.error('Error fetching data:', err)
@@ -115,6 +124,17 @@ export default function App() {
 
   const handleDeleteTransactionSubmit = async (txId) => {
     await dataService.deleteTransaction(txId)
+    await loadData()
+  }
+
+  // Cosmetics Items Handlers
+  const handleAddItemSubmit = async ({ name, brand, price, stock }) => {
+    await dataService.addItem(name, brand, price, stock)
+    await loadData()
+  }
+
+  const handleDeleteItemSubmit = async (itemId) => {
+    await dataService.deleteItem(itemId)
     await loadData()
   }
 
@@ -195,24 +215,63 @@ export default function App() {
                 </div>
               )}
 
-              {/* Customer Directory List */}
-              <div className="flex-1">
-                <CustomerList
-                  customers={customers}
-                  transactions={transactions}
-                  onSelectCustomer={setSelectedCustomer}
-                  onDeleteCustomer={handleDeleteCustomerSubmit}
-                />
+              {/* Tab Navigation Content */}
+              <div className="flex-1 flex flex-col">
+                {activeTab === 'ledgers' ? (
+                  <div className="flex-1">
+                    <CustomerList
+                      customers={customers}
+                      transactions={transactions}
+                      onSelectCustomer={setSelectedCustomer}
+                      onDeleteCustomer={handleDeleteCustomerSubmit}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1">
+                    <ItemsList
+                      items={items}
+                      onDeleteItem={handleDeleteItemSubmit}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Floating Action Button (FAB) for Add Customer */}
+              {/* Floating Action Button (FAB) based on active tab */}
               <button
-                onClick={() => setIsCustomerModalOpen(true)}
-                className="fixed bottom-6 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 text-white rounded-full shadow-lg transition-all active:scale-[0.95] cursor-pointer bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30"
-                title="Add New Customer"
+                onClick={() => {
+                  if (activeTab === 'ledgers') {
+                    setIsCustomerModalOpen(true)
+                  } else {
+                    setIsItemModalOpen(true)
+                  }
+                }}
+                className="fixed bottom-20 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 text-white rounded-full shadow-lg transition-all active:scale-[0.95] cursor-pointer bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30"
+                title={activeTab === 'ledgers' ? 'Add New Customer' : 'Add New Cosmetic Item'}
               >
                 <Plus size={24} />
               </button>
+
+              {/* Sticky Bottom Navigation Bar */}
+              <div className="sticky bottom-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center z-40 shadow-lg">
+                <button
+                  onClick={() => setActiveTab('ledgers')}
+                  className={`flex flex-col items-center gap-1 cursor-pointer transition-all ${
+                    activeTab === 'ledgers' ? 'text-emerald-600 scale-105 font-bold' : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  <BookOpen size={20} />
+                  <span className="text-[10px]">Ledgers</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('items')}
+                  className={`flex flex-col items-center gap-1 cursor-pointer transition-all ${
+                    activeTab === 'items' ? 'text-emerald-600 scale-105 font-bold' : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  <Sparkles size={20} />
+                  <span className="text-[10px]">Cosmetics</span>
+                </button>
+              </div>
             </div>
           )
         ) : null}
@@ -230,6 +289,13 @@ export default function App() {
           onSubmit={handleAddTransactionSubmit}
           type={transactionType}
           customerName={selectedCustomer ? selectedCustomer.name : ''}
+          items={items}
+        />
+
+        <ItemModal
+          isOpen={isItemModalOpen}
+          onClose={() => setIsItemModalOpen(false)}
+          onSubmit={handleAddItemSubmit}
         />
 
         {/* Setup Guide Modal */}
