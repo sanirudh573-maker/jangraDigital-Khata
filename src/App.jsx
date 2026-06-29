@@ -156,8 +156,7 @@ export default function App() {
               {/* Floating Action Button (FAB) for Add Customer */}
               <button
                 onClick={() => setIsCustomerModalOpen(true)}
-                className="fixed bottom-6 right-1/2 translate-x-[150px] z-30 p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg shadow-indigo-600/30 transition-transform active:scale-[0.95]"
-                style={{ right: 'max(16px, calc((100vw - 448px) / 2 + 16px))' }}
+                className="fixed bottom-6 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg shadow-indigo-600/30 transition-transform active:scale-[0.95]"
                 title="Add New Customer"
               >
                 <Plus size={24} />
