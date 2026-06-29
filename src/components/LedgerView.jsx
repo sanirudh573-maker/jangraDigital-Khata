@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { ArrowLeft, Phone, Share2, Plus, ArrowUpRight, ArrowDownLeft, Trash2, Calendar, FileText, X, MessageSquare } from 'lucide-react'
+import { jsPDF } from 'jspdf'
 
 export default function LedgerView({ customer, transactions, onBack, onAddTransaction, onDeleteTransaction }) {
   const [txFilter, setTxFilter] = useState('ALL')
@@ -173,6 +174,147 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
     setIsShareModalOpen(false)
   }
 
+  // Native share PDF Statement
+  const handleSharePDF = () => {
+    try {
+      const doc = new jsPDF()
+      
+      const primaryColor = [16, 185, 129] // Emerald Green
+      const darkColor = [15, 23, 42]     // Slate 900
+      const mutedColor = [100, 116, 139] // Slate 500
+      const redColor = [220, 38, 38]     // Red 600
+      const greenColor = [22, 163, 74]   // Green 600
+      
+      // 1. Header Branding
+      doc.setFillColor(...primaryColor)
+      doc.rect(15, 15, 180, 2, 'F')
+      
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(22)
+      doc.setTextColor(...darkColor)
+      doc.text("Jangra Store", 15, 27)
+      
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(...mutedColor)
+      doc.text("LEDGER STATEMENT REPORT", 15, 33)
+      
+      // 2. Customer & Date Info
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.setTextColor(...darkColor)
+      doc.text("CUSTOMER DETAILS", 15, 45)
+      
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.text(`Name: ${customer.name}`, 15, 51)
+      doc.text(`Phone: ${customer.phone}`, 15, 56)
+      doc.text(`Date: ${new Date().toLocaleDateString('en-IN')}`, 15, 61)
+      
+      doc.setFont('helvetica', 'bold')
+      doc.text("SUMMARY", 120, 45)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Total Transactions: ${customerTxs.length}`, 120, 51)
+      doc.text(`Total Credit (Udhar): Rs ${totalCredit}`, 120, 56)
+      doc.text(`Total Debit (Received): Rs ${totalDebit}`, 120, 61)
+      
+      // Balance Card Box
+      doc.setFillColor(248, 250, 252)
+      doc.rect(15, 68, 180, 18, 'F')
+      doc.setDrawColor(226, 232, 240)
+      doc.rect(15, 68, 180, 18, 'D')
+      
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(...mutedColor)
+      doc.text("NET OUTSTANDING BALANCE", 20, 74)
+      
+      doc.setFontSize(14)
+      doc.setTextColor(...darkColor)
+      doc.text(`Rs ${Math.abs(balance).toLocaleString('en-IN')}`, 20, 81)
+      
+      doc.setFontSize(10)
+      const balText = balance > 0 ? 'Customer will PAY (Udhar)' : balance < 0 ? 'You owe customer (Advance)' : 'Settled'
+      if (balance > 0) doc.setTextColor(...redColor)
+      else if (balance < 0) doc.setTextColor(...greenColor)
+      else doc.setTextColor(...mutedColor)
+      doc.text(balText, 120, 78)
+      
+      // 3. Table Header
+      let y = 98
+      doc.setFillColor(241, 245, 249)
+      doc.rect(15, y, 180, 8, 'F')
+      
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(...mutedColor)
+      doc.text("DATE & TIME", 18, y + 5.5)
+      doc.text("DESCRIPTION", 65, y + 5.5)
+      doc.text("AMOUNT", 165, y + 5.5)
+      
+      y += 8
+      
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      
+      customerTxs.forEach((tx) => {
+        if (y > 270) {
+          doc.addPage()
+          y = 20
+          doc.setFillColor(241, 245, 249)
+          doc.rect(15, y, 180, 8, 'F')
+          doc.setFont('helvetica', 'bold')
+          doc.text("DATE & TIME", 18, y + 5.5)
+          doc.text("DESCRIPTION", 65, y + 5.5)
+          doc.text("AMOUNT", 165, y + 5.5)
+          doc.setFont('helvetica', 'normal')
+          y += 8
+        }
+        
+        doc.setDrawColor(241, 245, 249)
+        doc.line(15, y + 6, 195, y + 6)
+        
+        doc.setTextColor(...darkColor)
+        doc.text(formatDate(tx.created_at), 18, y + 4)
+        doc.text(tx.description || 'No description', 65, y + 4)
+        
+        const prefix = tx.type === 'CREDIT' ? '+' : '-'
+        if (tx.type === 'CREDIT') doc.setTextColor(...redColor)
+        else doc.setTextColor(...greenColor)
+        
+        doc.text(`${prefix} Rs ${tx.amount}`, 165, y + 4)
+        y += 7
+      })
+      
+      doc.setFont('helvetica', 'italic')
+      doc.setFontSize(8)
+      doc.setTextColor(...mutedColor)
+      doc.text("Generated via Jangra Store app. Thank you!", 15, 285)
+      
+      const pdfBlob = doc.output('blob')
+      const fileName = `Statement_${customer.name.replace(/\s+/g, '_')}.pdf`
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' })
+      
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: `Ledger Statement - ${customer.name}`,
+          text: `Here is the ledger statement for ${customer.name} from Jangra Store.`
+        })
+        .catch(err => {
+          console.error("Error sharing PDF:", err)
+          doc.save(fileName)
+        })
+      } else {
+        doc.save(fileName)
+        alert("Sharing PDF is not supported on this browser. The PDF file has been downloaded instead.")
+      }
+    } catch (err) {
+      console.error("PDF generation/sharing failed:", err)
+      alert("Failed to generate or share PDF. Please try again.")
+    }
+  }
+
   return (
     <div className="max-w-md mx-auto flex flex-col min-height-[100svh] bg-slate-50 relative pb-28">
       {/* Top Header */}
@@ -193,19 +335,27 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
             >
               <Phone size={16} />
             </a>
+
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="p-2 text-emerald-400 hover:text-white hover:bg-emerald-600/20 rounded-xl transition-all border border-emerald-500/20 cursor-pointer"
+              title="WhatsApp Text Reminder"
+            >
+              <MessageSquare size={16} />
+            </button>
             
             <button
               onClick={handlePrintPDF}
               className="p-2 text-rose-400 hover:text-white hover:bg-rose-600/20 rounded-xl transition-all border border-rose-500/20 cursor-pointer"
-              title="Print Ledger Report"
+              title="View / Print Statement"
             >
               <FileText size={16} />
             </button>
 
             <button
-              onClick={() => setIsShareModalOpen(true)}
+              onClick={handleSharePDF}
               className="p-2 text-emerald-400 hover:text-white hover:bg-emerald-600/20 rounded-xl transition-all border border-emerald-500/20 cursor-pointer"
-              title="WhatsApp Reminder Options"
+              title="Share PDF Statement"
             >
               <Share2 size={16} />
             </button>
