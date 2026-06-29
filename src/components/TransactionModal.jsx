@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Check, IndianRupee, MessageSquare } from 'lucide-react'
+import { X, Check, IndianRupee, MessageSquare, Sparkles } from 'lucide-react'
 
 const QUICK_DESCRIPTIONS = {
   CREDIT: ['Kirana Udhar', 'Milk Supply', 'Dry Clean', 'Vegetables', 'Monthly Bill', 'Other Goods'],
