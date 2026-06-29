@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { ArrowLeft, Phone, Share2, Plus, ArrowUpRight, ArrowDownLeft, Trash2, Calendar, FileText, X, MessageSquare } from 'lucide-react'
 
-export default function LedgerView({ customer, transactions, onBack, onAddTransaction, onDeleteTransaction, storeName }) {
+export default function LedgerView({ customer, transactions, onBack, onAddTransaction, onDeleteTransaction }) {
   const [txFilter, setTxFilter] = useState('ALL')
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState('friendly')
@@ -67,7 +67,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
           <title>Ledger Statement - ${customer.name}</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 40px; color: #334155; }
-            .header { border-bottom: 2px solid #6366f1; padding-bottom: 16px; margin-bottom: 20px; }
+            .header { border-bottom: 2px solid #10b981; padding-bottom: 16px; margin-bottom: 20px; }
             .title { font-size: 22px; font-weight: 850; color: #0f172a; margin: 0; }
             .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
             .details { display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 12px; line-height: 1.5; }
@@ -82,7 +82,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
         </head>
         <body>
           <div class="header">
-            <div class="title">${storeName || 'Digital Khata'}</div>
+            <div class="title">Jangra Store</div>
             <div class="subtitle">Ledger Statement Report</div>
           </div>
           <div class="details">
@@ -119,7 +119,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
             </tbody>
           </table>
           <div class="footer">
-            Generated via ${storeName || 'Digital Khata'} app. Thank you!
+            Generated via Jangra Store app. Thank you!
           </div>
           <script>
             window.onload = function() { window.print(); window.close(); }
@@ -132,9 +132,9 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
 
   // Custom Message Templates
   const templates = {
-    friendly: `नमस्ते ${customer.name} जी, आपके खाते का बकाया बैलेंस ₹${Math.abs(balance)} (उधार) है। कृपया समय मिलने पर भुगतान कर दें। धन्यवाद! - ${storeName || 'Digital Khata'}`,
-    professional: `Dear ${customer.name}, your ledger statement at ${storeName || 'Digital Khata'} shows an outstanding balance of ₹${Math.abs(balance)}. Please settle the invoice at your earliest convenience. Thank you.`,
-    urgent: `अति आवश्यक सूचना: ${customer.name} जी, आपके खाते का ₹${Math.abs(balance)} का उधार काफी समय से लंबित है। कृपया आज ही इसका भुगतान करें ताकि भविष्य की असुविधा से बचा जा सके। - ${storeName || 'Digital Khata'}`
+    friendly: `नमस्ते ${customer.name} जी, आपके खाते का बकाया बैलेंस ₹${Math.abs(balance)} (उधार) है। कृपया समय मिलने पर भुगतान कर दें। धन्यवाद! - Jangra Store`,
+    professional: `Dear ${customer.name}, your ledger statement at Jangra Store shows an outstanding balance of ₹${Math.abs(balance)}. Please settle the invoice at your earliest convenience. Thank you.`,
+    urgent: `अति आवश्यक सूचना: ${customer.name} जी, आपके खाते का ₹${Math.abs(balance)} का उधार काफी समय से लंबित है। कृपया आज ही इसका भुगतान करें ताकि भविष्य की असुविधा से बचा जा सके। - Jangra Store`
   }
 
   const handleShareWhatsApp = () => {
@@ -159,7 +159,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
           <div className="flex items-center gap-1.5">
             <a
               href={`tel:${customer.phone}`}
-              className="p-2 text-indigo-400 hover:text-white hover:bg-indigo-600/20 rounded-xl transition-all border border-indigo-500/20"
+              className="p-2 text-emerald-400 hover:text-white hover:bg-emerald-600/20 rounded-xl transition-all border border-emerald-500/20"
               title="Call Customer"
             >
               <Phone size={16} />
@@ -185,7 +185,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
 
         {/* Customer Profile Details */}
         <div className="flex flex-col items-center text-center">
-          <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-extrabold text-lg mb-2 shadow-lg shadow-indigo-500/25 border border-indigo-500/30">
+          <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-extrabold text-lg mb-2 shadow-lg shadow-emerald-500/25 border border-emerald-500/30">
             {customer.name.substring(0, 2).toUpperCase()}
           </div>
           <h2 className="text-base font-bold tracking-wide">{customer.name}</h2>

@@ -62,20 +62,20 @@ export default function Auth({ onAuthSuccess }) {
         
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-extrabold text-xl mx-auto mb-3 shadow-lg shadow-indigo-500/20">
-            DK
+          <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-extrabold text-xl mx-auto mb-3 shadow-lg shadow-emerald-500/20">
+            JS
           </div>
-          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Digital Khata</h2>
-          <p className="text-xs text-slate-500 mt-1 font-medium">Your Active Mobile Business Ledger</p>
+          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Jangra Store</h2>
+          <p className="text-xs text-slate-500 mt-1 font-medium">Your Dedicated Shop Digital Ledger</p>
         </div>
-
+ 
         {/* Action Toggle */}
         <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
           <button
             onClick={() => { setIsSignUp(false); setError(null); setMessage(null); }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
               !isSignUp 
-                ? 'bg-white text-indigo-600 shadow-sm' 
+                ? 'bg-white text-emerald-600 shadow-sm' 
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -85,14 +85,14 @@ export default function Auth({ onAuthSuccess }) {
             onClick={() => { setIsSignUp(true); setError(null); setMessage(null); }}
             className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
               isSignUp 
-                ? 'bg-white text-indigo-600 shadow-sm' 
+                ? 'bg-white text-emerald-600 shadow-sm' 
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Create Account
           </button>
         </div>
-
+ 
         {/* Form Alerts */}
         {error && (
           <div className="mb-4 bg-red-50 border border-red-100 rounded-xl p-3 flex items-start gap-2.5 text-red-700 text-xs font-semibold">
@@ -100,14 +100,14 @@ export default function Auth({ onAuthSuccess }) {
             <span>{error}</span>
           </div>
         )}
-
+ 
         {message && (
           <div className="mb-4 bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-start gap-2.5 text-emerald-700 text-xs font-semibold">
             <Sparkles size={16} className="flex-shrink-0 mt-0.5 text-emerald-600" />
             <span>{message}</span>
           </div>
         )}
-
+ 
         {/* Form Inputs */}
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
@@ -120,13 +120,13 @@ export default function Auth({ onAuthSuccess }) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition-all"
+                className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition-all"
                 placeholder="shopkeeper@example.com"
                 required
               />
             </div>
           </div>
-
+ 
           <div>
             <label className="text-[10px] uppercase font-bold tracking-wider text-slate-500 block mb-1.5 ml-1">Password</label>
             <div className="relative">
@@ -137,18 +137,18 @@ export default function Auth({ onAuthSuccess }) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition-all"
+                className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 rounded-2xl py-3 pl-11 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition-all"
                 placeholder="Min. 6 characters"
                 required
               />
             </div>
           </div>
-
+ 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 mt-6 disabled:opacity-50"
+            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 mt-6 disabled:opacity-50"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

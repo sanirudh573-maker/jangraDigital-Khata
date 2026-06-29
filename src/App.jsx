@@ -14,8 +14,6 @@ import Auth from './components/Auth'
 export default function App() {
   // Authentication State
   const [session, setSession] = useState(null)
-  const [storeName, setStoreName] = useState('My Digital Khata')
-  const [theme, setTheme] = useState(() => localStorage.getItem('khata_theme') || 'indigo')
 
   // Application State
   const [customers, setCustomers] = useState([])
@@ -56,7 +54,6 @@ export default function App() {
       supabase.auth.getSession().then(({ data: { session } }) => {
         setSession(session)
         if (session) {
-          setStoreName(session.user?.user_metadata?.store_name || 'My Digital Khata')
           loadData()
         } else {
           setLoading(false)
@@ -67,12 +64,10 @@ export default function App() {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session)
         if (session) {
-          setStoreName(session.user?.user_metadata?.store_name || 'My Digital Khata')
           loadData()
         } else {
           setCustomers([])
           setTransactions([])
-          setStoreName('My Digital Khata')
           setLoading(false)
         }
       })
@@ -80,40 +75,15 @@ export default function App() {
       return () => subscription.unsubscribe()
     } else {
       // Local Demo Mode
-      const savedName = localStorage.getItem('khata_store_name') || 'My Digital Khata'
-      setStoreName(savedName)
       loadData()
     }
   }, [])
-
-  const handleUpdateStoreName = async (newName) => {
-    if (isSupabaseConfigured && session) {
-      try {
-        const { error } = await supabase.auth.updateUser({
-          data: { store_name: newName }
-        })
-        if (error) throw error
-        setStoreName(newName)
-      } catch (err) {
-        console.error('Error updating store name:', err)
-      }
-    } else {
-      setStoreName(newName)
-      localStorage.setItem('khata_store_name', newName)
-    }
-  }
-
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme)
-    localStorage.setItem('khata_theme', newTheme)
-  }
 
   const handleLogout = async () => {
     try {
       setLoading(true)
       await supabase.auth.signOut()
       setSession(null)
-      setStoreName('My Digital Khata')
     } catch (err) {
       console.error('Logout error:', err)
     } finally {
@@ -166,7 +136,7 @@ export default function App() {
         {/* Loading Overlay */}
         {loading && customers.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center py-20 bg-slate-50">
-            <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-3"></div>
             <p className="text-xs text-slate-500 font-medium">Loading Ledgers...</p>
           </div>
         )}
@@ -194,7 +164,6 @@ export default function App() {
               onBack={() => setSelectedCustomer(null)}
               onAddTransaction={triggerAddTransaction}
               onDeleteTransaction={handleDeleteTransactionSubmit}
-              storeName={storeName}
             />
           ) : (
             /* Main Directory/Dashboard View */
@@ -205,25 +174,21 @@ export default function App() {
                 transactions={transactions} 
                 onLogout={handleLogout}
                 isLive={isSupabaseConfigured}
-                storeName={storeName}
-                onUpdateStoreName={handleUpdateStoreName}
-                theme={theme}
-                onChangeTheme={handleThemeChange}
               />
 
               {/* Guide Toggle Banner (Only shows if Supabase isn't configured) */}
               {!isSupabaseConfigured && (
-                <div className="mx-4 mt-4 bg-indigo-50 border border-indigo-100 rounded-2xl p-3 flex items-start gap-2.5 shadow-sm">
-                  <Database size={16} className="text-indigo-600 mt-0.5 flex-shrink-0" />
+                <div className="mx-4 mt-4 bg-emerald-50 border border-emerald-100 rounded-2xl p-3 flex items-start gap-2.5 shadow-sm">
+                  <Database size={16} className="text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <h4 className="text-xs font-bold text-indigo-900 leading-tight">Demo Mode Active</h4>
-                    <p className="text-[10px] text-indigo-700 mt-0.5 leading-relaxed">
+                    <h4 className="text-xs font-bold text-emerald-900 leading-tight">Demo Mode Active</h4>
+                    <p className="text-[10px] text-emerald-700 mt-0.5 leading-relaxed">
                       Transactions are saved locally on this browser. Click "Setup Supabase" to enable cloud sync.
                     </p>
                   </div>
                   <button
                     onClick={() => setShowSetupGuide(true)}
-                    className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2 py-1 rounded-lg transition-colors flex-shrink-0"
+                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-800 bg-white border border-emerald-200 px-2 py-1 rounded-lg transition-colors flex-shrink-0"
                   >
                     Setup Guide
                   </button>
@@ -243,12 +208,7 @@ export default function App() {
               {/* Floating Action Button (FAB) for Add Customer */}
               <button
                 onClick={() => setIsCustomerModalOpen(true)}
-                className={`fixed bottom-6 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 text-white rounded-full shadow-lg transition-all active:scale-[0.95] cursor-pointer ${
-                  theme === 'indigo' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/30' :
-                  theme === 'emerald' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30' :
-                  theme === 'amber' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/30' :
-                  'bg-slate-700 hover:bg-slate-800 shadow-slate-700/30'
-                }`}
+                className="fixed bottom-6 right-6 md:right-1/2 md:translate-x-[180px] z-30 p-4 text-white rounded-full shadow-lg transition-all active:scale-[0.95] cursor-pointer bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30"
                 title="Add New Customer"
               >
                 <Plus size={24} />
@@ -280,7 +240,7 @@ export default function App() {
               <div className="flex justify-between items-start mb-4 pb-2 border-b border-slate-100">
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
-                    <Database size={16} className="text-indigo-600" />
+                    <Database size={16} className="text-emerald-600" />
                     <span>Supabase Schema Configuration</span>
                   </h3>
                   <p className="text-[10px] text-slate-400">Copy SQL queries below to set up your backend</p>
@@ -295,7 +255,7 @@ export default function App() {
 
               <div className="space-y-4 text-xs text-slate-600">
                 <p>
-                  1. Go to your <a href="https://supabase.com" target="_blank" rel="noreferrer" className="text-indigo-600 underline font-semibold">Supabase Dashboard</a> and create a new project.
+                  1. Go to your <a href="https://supabase.com" target="_blank" rel="noreferrer" className="text-emerald-600 underline font-semibold">Supabase Dashboard</a> and create a new project.
                 </p>
                 <p>
                   2. Open the <strong>SQL Editor</strong> in Supabase and run the following queries to create the necessary tables:

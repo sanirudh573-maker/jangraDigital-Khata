@@ -159,7 +159,11 @@ export default function TransactionModal({ isOpen, onClose, onSubmit, type: init
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={isCredit ? 'e.g. Rice and wheat bag' : 'e.g. Cash payment'}
                 disabled={loading}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-900 transition-all"
+                className={`w-full pl-10 pr-4 py-3 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:bg-white text-slate-900 transition-all ${
+                  isCredit 
+                    ? 'border-red-100 focus:ring-red-500' 
+                    : 'border-green-100 focus:ring-green-500'
+                }`}
               />
             </div>
 
