@@ -27,17 +27,16 @@ export default function DashboardStats({ customers, transactions, onLogout, isLi
         {/* Main Title / Brand */}
         <div className="flex items-center justify-between mb-3.5">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="p-2 rounded-xl text-white shadow-md transition-all bg-emerald-600 shadow-emerald-500/20">
-              <Wallet size={20} className="animate-pulse" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white shadow-md transition-all flex items-center justify-center border border-slate-700/55 flex-shrink-0">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent truncate">
-                Jangra Store
+              <h1 className="text-[12px] font-extrabold tracking-tight bg-slate-100 truncate">
+                Jangra Store & Parlour
               </h1>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">DIGITAL ACTIVE LEDGER</p>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">DIGITAL LEDGER</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2.5">
+          </div>          <div className="flex items-center gap-2.5">
             <span className="text-[10px] bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full font-bold">
               {isLive ? 'Supabase Live' : 'Demo Mode'}
             </span>

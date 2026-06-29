@@ -62,13 +62,12 @@ export default function Auth({ onAuthSuccess }) {
         
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-extrabold text-xl mx-auto mb-3 shadow-lg shadow-emerald-500/20">
-            JS
+          <div className="w-16 h-16 bg-white text-emerald-600 rounded-2xl flex items-center justify-center overflow-hidden mx-auto mb-3 shadow-lg border border-slate-100">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Jangra Store</h2>
-          <p className="text-xs text-slate-500 mt-1 font-medium">Your Dedicated Shop Digital Ledger</p>
-        </div>
- 
+          <h2 className="text-base font-extrabold text-slate-800 tracking-tight">Jangra Store & Beauty Parlour</h2>
+          <p className="text-[10px] text-slate-500 mt-1 font-medium font-bold text-emerald-600">Digital Ledger & Services Manager</p>
+        </div> 
         {/* Action Toggle */}
         <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
           <button

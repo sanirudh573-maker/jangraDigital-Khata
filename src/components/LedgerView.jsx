@@ -99,8 +99,8 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
           <!-- Sticky Top Bar for Action Preview -->
           <div class="no-print" style="position: sticky; top: 0; background: #0f172a; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); z-index: 100; font-family: sans-serif;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <div style="background: #10b981; color: white; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">JS</div>
-              <span style="color: white; font-size: 13px; font-weight: bold;">Jangra Store Ledger Preview</span>
+              <img src="/logo.png" style="width: 28px; height: 28px; border-radius: 8px; object-fit: cover;" />
+              <span style="color: white; font-size: 13px; font-weight: bold;">Jangra Store & Parlour Ledger Preview</span>
             </div>
             <div style="display: flex; gap: 8px;">
               <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px;">
@@ -114,7 +114,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
 
           <div class="preview-container">
             <div class="header">
-              <div class="title">Jangra Store</div>
+              <div class="title">Jangra Store & Parlour</div>
               <div class="subtitle">Ledger Statement Report</div>
             </div>
             <div class="details">
@@ -151,7 +151,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
               </tbody>
             </table>
             <div class="footer">
-              Generated via Jangra Store app. Thank you!
+              Generated via Jangra Store & Parlour app. Thank you!
             </div>
           </div>
         </body>
@@ -162,9 +162,9 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
 
   // Custom Message Templates
   const templates = {
-    friendly: `नमस्ते ${customer.name} जी, आपके खाते का बकाया बैलेंस ₹${Math.abs(balance)} (उधार) है। कृपया समय मिलने पर भुगतान कर दें। धन्यवाद! - Jangra Store`,
-    professional: `Dear ${customer.name}, your ledger statement at Jangra Store shows an outstanding balance of ₹${Math.abs(balance)}. Please settle the invoice at your earliest convenience. Thank you.`,
-    urgent: `अति आवश्यक सूचना: ${customer.name} जी, आपके खाते का ₹${Math.abs(balance)} का उधार काफी समय से लंबित है। कृपया आज ही इसका भुगतान करें ताकि भविष्य की असुविधा से बचा जा सके। - Jangra Store`
+    friendly: `नमस्ते ${customer.name} जी, आपके खाते का बकाया बैलेंस ₹${Math.abs(balance)} (उधार) है। कृपया समय मिलने पर भुगतान कर दें। धन्यवाद! - Jangra Store & Parlour`,
+    professional: `Dear ${customer.name}, your ledger statement at Jangra Store & Parlour shows an outstanding balance of ₹${Math.abs(balance)}. Please settle the invoice at your earliest convenience. Thank you.`,
+    urgent: `अति आवश्यक सूचना: ${customer.name} जी, आपके खाते का ₹${Math.abs(balance)} का उधार काफी समय से लंबित है। कृपया आज ही इसका भुगतान करें ताकि भविष्य की असुविधा से बचा जा सके। - Jangra Store & Parlour`
   }
 
   const handleShareWhatsApp = () => {
@@ -192,7 +192,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(22)
       doc.setTextColor(...darkColor)
-      doc.text("Jangra Store", 15, 27)
+      doc.text("Jangra Store & Parlour", 15, 27)
       
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
@@ -289,7 +289,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
       doc.setFont('helvetica', 'italic')
       doc.setFontSize(8)
       doc.setTextColor(...mutedColor)
-      doc.text("Generated via Jangra Store app. Thank you!", 15, 285)
+      doc.text("Generated via Jangra Store & Parlour app. Thank you!", 15, 285)
       
       const pdfBlob = doc.output('blob')
       const fileName = `Statement_${customer.name.replace(/\s+/g, '_')}.pdf`
@@ -299,7 +299,7 @@ export default function LedgerView({ customer, transactions, onBack, onAddTransa
         navigator.share({
           files: [file],
           title: `Ledger Statement - ${customer.name}`,
-          text: `Here is the ledger statement for ${customer.name} from Jangra Store.`
+          text: `Here is the ledger statement for ${customer.name} from Jangra Store & Parlour.`
         })
         .catch(err => {
           console.error("Error sharing PDF:", err)
